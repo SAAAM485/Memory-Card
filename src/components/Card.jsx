@@ -1,9 +1,11 @@
-export default function Card({ character }) {
+export default function Card({ character, onClick }) {
+    const name =
+        character.name.charAt(0).toUpperCase() + character.name.slice(1);
     return (
-        <div className="card">
+        <div className="card" id={`${character.name}`} onClick={onClick}>
             <div className="card-content">
-                <img src="" alt="" />
-                <h1>{`${character}`}</h1>
+                <img src={`${character.url}`} alt={`${name}`} />
+                <h1>{`${name}`}</h1>
             </div>
         </div>
     );
