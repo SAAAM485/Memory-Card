@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import Card from "./Card";
+import Win from "./Win";
+import Lose from "./Lose";
+import { winLoseContext } from "./context";
 
 export default function Board() {
     const [characters, setCharacters] = useState([]);
     const [memories, setMemories] = useState([]);
     const [score, setScore] = useState(0);
     const [highestScore, setHighestScore] = useState(0);
+    const [lose, setLose] = useState(false);
     const names = [
         "shenhe",
         "tighnari",
@@ -56,8 +60,7 @@ export default function Board() {
         console.log(clickedTarget);
 
         if (memories.includes(clickedTarget)) {
-            setMemories([]);
-            setScore(0);
+            setLose(true);
         } else {
             setMemories((prevMemories) => [...prevMemories, clickedTarget]);
             shuffleCharacters();
@@ -68,23 +71,37 @@ export default function Board() {
         }
     };
 
+    const retryHandler = () => {
+        setMemories([]);
+        setScore(0);
+        setLose(false);
+        shuffleCharacters();
+    };
+
     return (
         <>
             <header>
                 <h1>Genshin Memory Card</h1>
                 <div>Highest Score {highestScore}</div>
-                {highestScore >= 12 && <div>You win</div>}
+
                 <div>Score {score}</div>
             </header>
-            <div className="card-container">
-                {characters.map((character, index) => (
-                    <Card
-                        key={index}
-                        character={character}
-                        onClick={handleClick}
-                    />
-                ))}
-            </div>
+            <winLoseContext.Provider value={{ lose, retryHandler }}>
+                <div className="card-container">
+                    {score < 12 &&
+                        !lose &&
+                        characters.map((character, index) => (
+                            <Card
+                                key={index}
+                                character={character}
+                                onClick={handleClick}
+                            />
+                        ))}
+                    {score == 12 && <Win />}
+                    {lose && <Lose />}
+                </div>
+            </winLoseContext.Provider>
+
             <footer>A Fan-made Genshin Impact Memory Card Game</footer>
         </>
     );
