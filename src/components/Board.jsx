@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Card from "./Card";
 import Win from "./Win";
 import Lose from "./Lose";
@@ -10,6 +10,9 @@ export default function Board() {
     const [score, setScore] = useState(0);
     const [highestScore, setHighestScore] = useState(0);
     const [lose, setLose] = useState(false);
+    const [flip, setFlip] = useState(false);
+    const [hoveredCard, setHoveredCard] = useState(null);
+    const cardContainerRef = useRef(null);
     const names = [
         "shenhe",
         "tighnari",
@@ -57,25 +60,29 @@ export default function Board() {
 
     const handleClick = (e) => {
         const clickedTarget = e.currentTarget.id;
-        console.log(clickedTarget);
-
+        setFlip(true);
         if (memories.includes(clickedTarget)) {
             setLose(true);
         } else {
             setMemories((prevMemories) => [...prevMemories, clickedTarget]);
             shuffleCharacters();
+            setTimeout(() => {
+                setFlip(false);
+            }, 1000);
             if (score + 1 > highestScore) {
                 setHighestScore((prevHigh) => (prevHigh += 1));
             }
             setScore((prevScore) => (prevScore += 1));
         }
     };
-
     const retryHandler = () => {
         setMemories([]);
         setScore(0);
         setLose(false);
         shuffleCharacters();
+        setTimeout(() => {
+            setFlip(false);
+        }, 1000);
     };
 
     return (
@@ -87,7 +94,12 @@ export default function Board() {
                 <div>Score {score}</div>
             </header>
             <winLoseContext.Provider value={{ lose, retryHandler }}>
-                <div className="card-container">
+                <div
+                    className={`card-container ${
+                        score < 12 && !lose ? "grid" : ""
+                    }`}
+                    ref={cardContainerRef}
+                >
                     {score < 12 &&
                         !lose &&
                         characters.map((character, index) => (
@@ -95,6 +107,10 @@ export default function Board() {
                                 key={index}
                                 character={character}
                                 onClick={handleClick}
+                                flipped={flip}
+                                isHovered={character.name === hoveredCard}
+                                onMouseEnter={(name) => setHoveredCard(name)}
+                                onMouseLeave={() => setHoveredCard(null)}
                             />
                         ))}
                     {score == 12 && <Win />}

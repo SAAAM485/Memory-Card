@@ -1,3 +1,7 @@
+@font-face {
+    font-family: "genshin";
+    src: url("/assets/genshin.ttf") format("truetype");
+}
 :root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -28,11 +32,20 @@ body {
     place-items: center;
     min-width: 320px;
     min-height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-image: url("/assets/background.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
 }
 
 h1 {
     font-size: 3.2em;
     line-height: 1.1;
+    font-family: genshin;
 }
 
 button {
@@ -67,11 +80,124 @@ button:focus-visible {
     }
 }
 
-img {
-    height: 20rem;
+.win,
+.lose {
+    font-family: genshin;
+    font-size: 6rem;
 }
 
-.cardContent {
+.card-container.grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2rem;
+    perspective: 100rem;
+    height: 70vh;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+}
+.card-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 70vh;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+}
+
+.card-front img {
+    height: 20rem;
+    object-fit: cover;
+    border-radius: 1rem;
+}
+.card-back img {
+    width: 9rem;
+    border-radius: 1rem;
+}
+
+.card {
+    position: relative;
     height: 20rem;
     width: 9rem;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.6s, box-shadow 0.6s; /* 翻轉動畫 */
+    cursor: pointer; /* 鼠標懸停時顯示指針 */
+    border-radius: 1rem;
+}
+
+.card p {
+    position: absolute;
+    text-align: center;
+    width: 5rem;
+    bottom: 0rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景，提升可讀性 */
+    color: white; /* 字體顏色 */
+    padding: 0.5rem 1.2rem; /* 內間距 */
+    border-radius: 0.5rem;
+    font-family: genshin;
+    font-size: 0.8rem;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+.card.flipped .card-inner {
+    transform: rotateY(180deg); /* 翻轉效果 */
+}
+.card-front,
+.card-back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden; /* 隱藏背面 */
+}
+.card-front {
+    transform: rotateY(0deg); /* 正面 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.card-back {
+    transform: rotateY(180deg); /* 背面 */
+    background-image: url("/assets/cardbackground.png");
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-back::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(
+        255,
+        255,
+        255,
+        0.06
+    ); /* 半透明的黑色濾鏡，可調整透明度 */
+    pointer-events: none; /* 確保濾鏡層不影響卡片上的其他操作 */
+}
+
+.card.hovered {
+    transform: translateY(-10px) scale(1.05); /* 浮動效果和放大 */
+    transition: transform 0.2s;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px,
+        rgba(0, 0, 0, 0.1) 0px 2px 4px 0px,
+        rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+}
+
+footer {
+    text-align: center;
 }
