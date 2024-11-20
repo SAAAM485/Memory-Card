@@ -3,6 +3,7 @@ import Card from "./Card";
 import Win from "./Win";
 import Lose from "./Lose";
 import { winLoseContext } from "./context";
+import Loading from "./Loading";
 
 export default function Board() {
     const [characters, setCharacters] = useState([]);
@@ -12,6 +13,8 @@ export default function Board() {
     const [lose, setLose] = useState(false);
     const [flip, setFlip] = useState(false);
     const [hoveredCard, setHoveredCard] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [progress, setProgress] = useState(0);
     const cardContainerRef = useRef(null);
     const names = [
         "shenhe",
@@ -30,6 +33,7 @@ export default function Board() {
 
     useEffect(() => {
         const fetchImages = async () => {
+            setProgress(0);
             const characterData = await Promise.all(
                 names.map(async (name) => {
                     const response = await fetch(
@@ -39,10 +43,12 @@ export default function Board() {
                     const blob = await response.blob();
                     // 創建 URL 來表示圖片
                     const url = URL.createObjectURL(blob);
+                    setProgress((prev) => prev + (1 / names.length) * 100);
                     return { name, url };
                 })
             );
             setCharacters(characterData);
+            setLoading(false);
         };
         fetchImages();
     }, []);
@@ -89,33 +95,40 @@ export default function Board() {
         <>
             <header>
                 <h1>Genshin Memory Card</h1>
-                <div>Highest Score {highestScore}</div>
-
-                <div>Score {score}</div>
+                <div className="score-board">
+                    <div>Highest Score: {highestScore}</div>
+                    <div>Score: {score}</div>
+                </div>
             </header>
             <winLoseContext.Provider value={{ lose, retryHandler }}>
-                <div
-                    className={`card-container ${
-                        score < 12 && !lose ? "grid" : ""
-                    }`}
-                    ref={cardContainerRef}
-                >
-                    {score < 12 &&
-                        !lose &&
-                        characters.map((character, index) => (
-                            <Card
-                                key={index}
-                                character={character}
-                                onClick={handleClick}
-                                flipped={flip}
-                                isHovered={character.name === hoveredCard}
-                                onMouseEnter={(name) => setHoveredCard(name)}
-                                onMouseLeave={() => setHoveredCard(null)}
-                            />
-                        ))}
-                    {score == 12 && <Win />}
-                    {lose && <Lose />}
-                </div>
+                {loading ? (
+                    <Loading progress={progress} />
+                ) : (
+                    <div
+                        className={`card-container ${
+                            score < 12 && !lose ? "grid" : ""
+                        }`}
+                        ref={cardContainerRef}
+                    >
+                        {score < 12 &&
+                            !lose &&
+                            characters.map((character, index) => (
+                                <Card
+                                    key={index}
+                                    character={character}
+                                    onClick={handleClick}
+                                    flipped={flip}
+                                    isHovered={character.name === hoveredCard}
+                                    onMouseEnter={(name) =>
+                                        setHoveredCard(name)
+                                    }
+                                    onMouseLeave={() => setHoveredCard(null)}
+                                />
+                            ))}
+                        {score == 12 && <Win />}
+                        {lose && <Lose />}
+                    </div>
+                )}
             </winLoseContext.Provider>
 
             <footer>A Fan-made Genshin Impact Memory Card Game</footer>
